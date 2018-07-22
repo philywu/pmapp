@@ -1,4 +1,6 @@
-import React from 'react';
+import React , { Component } from 'react';
+
+import './PropertyList.css';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
@@ -9,49 +11,70 @@ import ImageIcon from '@material-ui/icons/Image';
 import WorkIcon from '@material-ui/icons/Work';
 import BeachAccessIcon from '@material-ui/icons/BeachAccess';
 import Divider from '@material-ui/core/Divider';
+import axios from 'axios'
 
-const styles = theme => ({
-  root: {
-    width: '100%',
-    maxWidth: 360,
-    backgroundColor: theme.palette.background.paper,
-  },
-});
 
-function PropertyList(props) {
-  const { classes } = props;
+class PropertyList extends Component {
+  // Adds a class constructor that assigns the initial state values:
+  constructor () {
+      super();
+      this.state = {
+        propertyListData:[]
+      };
+      
+  }
+ 
+  
+   componentWillMount() {
+    var url = 'http://localhost:8000/api/properties';
+    var propList ;
+    
+    axios.get(url)
+    .then(response => {
+      console.log(response.data);
+      propList = response.data;
+      this.setState({  
+        propertyListData : response.data
+      });
+      
+    })
+    .catch(error => {
+      console.log(error)
+  });
+   
+    
+  }
+
+render () {
+  // const styles = theme => ({
+  //   root: {
+  //     width: '100%',
+  //     maxWidth: 360,
+  //     backgroundColor: theme.palette.background.paper,
+  //   },
+  // });
+   const { classes } = this.props;
+   var listItems = [];
+   if ( this.state.propertyListData){
+     listItems = this.state.propertyListData.map((item) => 
+      <ListItem className="card" key={item._id}>
+      <Avatar>
+        <ImageIcon />
+      </Avatar>
+      <ListItemText primary={item.name} secondary={item.address} />
+    </ListItem>
+
+     );
+   }
   return (
-    <div className={classes.root}>
+    
+    <div >
       <List>
-        <ListItem>
-          <Avatar>
-            <ImageIcon />
-          </Avatar>
-          <ListItemText primary="Photos" secondary="Jan 9, 2014" />
-        </ListItem>
-        <li>
-          <Divider inset />
-        </li>
-        <ListItem>
-          <Avatar>
-            <WorkIcon />
-          </Avatar>
-          <ListItemText primary="Work" secondary="Jan 7, 2014" />
-        </ListItem>
-        <Divider inset component="li" />
-        <ListItem>
-          <Avatar>
-            <BeachAccessIcon />
-          </Avatar>
-          <ListItemText primary="Vacation" secondary="July 20, 2014" />
-        </ListItem>
+       {listItems}
       </List>
     </div>
   );
 }
-
-PropertyList.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
-export default withStyles(styles)(PropertyList);
+}
+export default PropertyList;
+//export default withStyles(styles)(PropertyList);
